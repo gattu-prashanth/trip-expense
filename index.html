@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Trip Expenses</title>
+  <title>Kashi Trip Expenses</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
@@ -31,6 +31,10 @@
       padding: 10px;
       margin-top: 8px;
       border-radius: 6px;
+    }
+    .delete-btn {
+      background: #e74c3c;
+      margin-top: 6px;
     }
     .total {
       font-weight: bold;
@@ -63,7 +67,7 @@
 <div class="total" id="total">Total: ₹0</div>
 
 <script>
-  // Load saved data when app opens
+  // Load saved expenses
   let expenses = JSON.parse(localStorage.getItem("trip_expenses")) || [];
 
   function saveExpense() {
@@ -77,13 +81,13 @@
     }
 
     expenses.push({
+      id: Date.now(), // unique id
       name,
       amount: Number(amount),
       desc,
       time: new Date().toLocaleString()
     });
 
-    // SAVE permanently to mobile
     localStorage.setItem("trip_expenses", JSON.stringify(expenses));
 
     nameInput.value = "";
@@ -96,6 +100,14 @@
     render();
   }
 
+  function deleteExpense(id) {
+    if (!confirm("Delete this expense?")) return;
+
+    expenses = expenses.filter(e => e.id !== id);
+    localStorage.setItem("trip_expenses", JSON.stringify(expenses));
+    render();
+  }
+
   function render() {
     list.innerHTML = "";
     let total = 0;
@@ -105,8 +117,11 @@
       list.innerHTML += `
         <div class="expense">
           <b>${e.name}</b> paid ₹${e.amount}<br>
-          <small>${e.desc}</small><br>
-          <small style="color:#777">${e.time}</small>
+          <small>${e.desc || ""}</small><br>
+          <small style="color:#777">${e.time}</small><br>
+          <button class="delete-btn" onclick="deleteExpense(${e.id})">
+            🗑️ Delete
+          </button>
         </div>
       `;
     });
@@ -114,7 +129,7 @@
     totalDiv.innerText = "Total: ₹" + total;
   }
 
-  // DOM shortcuts
+  // DOM elements
   const nameInput = document.getElementById("name");
   const amountInput = document.getElementById("amount");
   const descInput = document.getElementById("desc");
